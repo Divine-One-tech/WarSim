@@ -4,9 +4,12 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#include <vector>
 using namespace std;
 
 #define SIZE 10
+#define NUM_OF_STATS 8 
+#define COUNTRYSELECTIONSIZE 2
 
 string countries[SIZE] =
 {
@@ -37,46 +40,28 @@ float dmgTMultiplier[] =
     0.35, 0.3, 0.025, 0.02, 0.015, 0.01
 };
 
-int getCountryA()
+void selectCountry(int *arr)
 {
-    bool check = true;
-    int numero;
-    cout << "Please choose aggressor country from this list: " << endl;
+    int numero1, numero2;
+    cout << "Please choose aggressor and defending country from this list" << endl;
+    
     for (int i = 0; i < SIZE; i++)
     {
         cout << i + 1 << ". " << countries[i] << endl;
     }
     cout << "Enter the number: ";
-    while ((check))
-    {
-        cin >> numero;
-        if ((numero < 1 || numero > SIZE) || cin.fail())
-        {
-            cout << "Invalid Number" << endl;
-            cin.clear();
-            cin.ignore(INT64_MAX, '\n');
-            cout << "Enter the number again: ";
-        }
-        else
-            check = false;
-    }
-    return numero - 1;
+    cin >> numero1 >> numero2;
+    arr[0] = numero1;
+    arr[1] = numero2;
 }
 
-int getCountryB()
+int errorhandling(int i)
 {
+    int num;
     bool check = true;
-    int numero;
-    cout << "Please choose defensive country from this list: " << endl;
-    for (int i = 0; i < SIZE; i++)
-    {
-        cout << i + 1 << ". " << countries[i] << endl;
-    }
-    cout << "Enter the number: ";
     while ((check))
     {
-        cin >> numero;
-        if ((numero < 1 || numero > SIZE) || cin.fail())
+        if ((i < 1 || i > SIZE) || (num < 1 || num > SIZE) || cin.fail())
         {
             cout << "Invalid Number" << endl;
             cin.clear();
@@ -85,12 +70,14 @@ int getCountryB()
         }
         else
             check = false;
+        cin >> num;
     }
-    return numero - 1;
+    return num;
 }
 
 int getLocation()
 {
+    bool check = true;
     int choice;
     cout << "Please choose a location u would like to simulate from this list" << endl;
     for (int i = 0; i < 5; i++)
@@ -98,17 +85,29 @@ int getLocation()
         cout << i + 1 << ". " << locationsForSimulation[i] << endl;
     }
     cout << "Please enter the corresponding number: ";
-    cin >> choice;
+    while ((check))
+    {
+        cin >> choice;
+        if ((choice < 1 || choice > SIZE) || cin.fail())
+        {            
+            cout << "Invalid Number" << endl;
+            cin.clear();
+            cin.ignore(INT64_MAX, '\n');
+            cout << "Enter the number again: ";
+        }
+        else
+            check = false;
+    }
     return choice - 1;
 }
 
-int getArmyOffenseA(int a)
+int getArmyOffense(int i)
 {
     ifstream inFileA1;
     string milEquipment;
     int equipmentAmount;
     int totalArmyvehicles = 0;
-    inFileA1.open(countries[a].insert(countries[a].length(), "Army.txt"));
+    inFileA1.open(countries[i].insert(countries[i].length(), "Army.txt"));
 
     while (true)
     {
@@ -121,13 +120,13 @@ int getArmyOffenseA(int a)
     return totalArmyvehicles;
 }
 
-int getArmylogisticsA(int a)
+int getArmyLog(int i)
 {
     ifstream inFileA1;
     string logEquipment;
     int equipmentAmount;
     int totalArmylogVehicles = 0;
-    inFileA1.open(countries[a].insert(countries[a].length(), "ArmyL.txt"));
+    inFileA1.open(countries[i].insert(countries[i].length(), "ArmyL.txt"));
 
     while (true)
     {
@@ -140,13 +139,13 @@ int getArmylogisticsA(int a)
     return totalArmylogVehicles;
 }
 
-int getAirForceOffenseA(int a)
+int getAirForceOffense(int i)
 {
     ifstream inFileA2;
     string milEquipment;
     int equipmentAmount;
     int totalCombatAircraft = 0;
-    inFileA2.open(countries[a].insert(countries[a].length(), "AirForce.txt"));
+    inFileA2.open(countries[i].insert(countries[i].length(), "AirForce.txt"));
 
     while (true)
     {
@@ -159,13 +158,13 @@ int getAirForceOffenseA(int a)
     return totalCombatAircraft;
 }
 
-int getAirForceLogA(int a)
+int getAirForceLog(int i)
 {
     ifstream inFileA2;
     string logEquipment;
     int equipmentAmount;
     int totalLogVehicle = 0;
-    inFileA2.open(countries[a].insert(countries[a].length(), "AirForceL.txt"));
+    inFileA2.open(countries[i].insert(countries[i].length(), "AirForceL.txt"));
 
     while (true)
     {
@@ -178,13 +177,13 @@ int getAirForceLogA(int a)
     return totalLogVehicle;
 }
 
-int getNavyOffenseA(int a)
+int getNavyOffense(int i)
 {
     ifstream inFileA3;
     string milEquipment;
     int equipmentAmount;
     int totalNavalVessels = 0;
-    inFileA3.open(countries[a].insert(countries[a].length(), "Navy.txt"));
+    inFileA3.open(countries[i].insert(countries[i].length(), "Navy.txt"));
 
     while (true)
     {
@@ -197,13 +196,13 @@ int getNavyOffenseA(int a)
     return totalNavalVessels;
 }
 
-int getNavyLogA(int a)
+int getNavyLog(int i)
 {
     ifstream inFileA3;
     string logEquipment;
     int equipmentAmount;
     int totalLogVehicles = 0;
-    inFileA3.open(countries[a].insert(countries[a].length(), "NavyL.txt"));
+    inFileA3.open(countries[i].insert(countries[i].length(), "NavyL.txt"));
 
     while (true)
     {
@@ -216,13 +215,13 @@ int getNavyLogA(int a)
     return totalLogVehicles;
 }
 
-int getMarinesOffenseA(int a)
+int getMarinesOffense(int i)
 {
     ifstream inFileA4;
     string milEquipment;
     int equipmentAmount;
     int totalCombatCapability = 0;
-    inFileA4.open(countries[a].insert(countries[a].length(), "Marine.txt"));
+    inFileA4.open(countries[i].insert(countries[i].length(), "Marine.txt"));
 
     while (true)
     {
@@ -235,13 +234,13 @@ int getMarinesOffenseA(int a)
     return totalCombatCapability;
 }
 
-int getMarinesLogA(int a)
+int getMarinesLog(int i)
 {
     ifstream inFileA4;
     string logEquipment;
     int equipmentAmount;
     int totalLogVehicle = 0;
-    inFileA4.open(countries[a].insert(countries[a].length(), "MarineL.txt"));
+    inFileA4.open(countries[i].insert(countries[i].length(), "MarineL.txt"));
 
     while (true)
     {
@@ -254,164 +253,12 @@ int getMarinesLogA(int a)
     return totalLogVehicle;
 }
 
-int getArmyOffenseB(int b)
-{
-    ifstream inFileB1;
-    string milEquipment;
-    int equipmentAmount;
-    int totalArmyvehicles = 0;
-    inFileB1.open(countries[b].insert(countries[b].length(), "Army.txt"));
-
-    while (true)
-    {
-        inFileB1 >> milEquipment >> equipmentAmount;
-        if (inFileB1.fail())  break;
-        totalArmyvehicles += equipmentAmount;
-        if (inFileB1.eof())
-            break;
-    }
-    return totalArmyvehicles;
-}
-
-int getArmylogisticsA(int b)
-{
-    ifstream inFileB1;
-    string logEquipment;
-    int equipmentAmount;
-    int totalArmylogVehicles = 0;
-    inFileB1.open(countries[b].insert(countries[b].length(), "ArmyL.txt"));
-
-    while (true)
-    {
-        inFileB1 >> logEquipment >> equipmentAmount;
-        if (inFileB1.fail()) break;
-        totalArmylogVehicles += equipmentAmount;
-        if (inFileB1.eof())
-            break;
-    }
-    return totalArmylogVehicles;
-}
-
-int getAirForceOffenseA(int b)
-{
-    ifstream inFileB2;
-    string milEquipment;
-    int equipmentAmount;
-    int totalCombatAircraft = 0;
-    inFileB2.open(countries[b].insert(countries[b].length(), "AirForce.txt"));
-
-    while (true)
-    {
-        inFileB2 >> milEquipment >> equipmentAmount;
-        if (inFileB2.fail()) break;
-        totalCombatAircraft += equipmentAmount;
-        if (inFileB2.eof())
-            break;
-    }
-    return totalCombatAircraft;
-}
-
-int getAirForceLogA(int b)
-{
-    ifstream inFileB2;
-    string logEquipment;
-    int equipmentAmount;
-    int totalLogVehicle = 0;
-    inFileB2.open(countries[b].insert(countries[b].length(), "AirForceL.txt"));
-
-    while (true)
-    {
-        inFileB2 >> logEquipment >> equipmentAmount;
-        if (inFileB2.fail()) break;
-        totalLogVehicle += equipmentAmount;
-        if (inFileB2.eof())
-            break;
-    }
-    return totalLogVehicle;
-}
-
-int getNavyOffenseA(int b)
-{
-    ifstream inFileB3;
-    string milEquipment;
-    int equipmentAmount;
-    int totalNavalVessels = 0;
-    inFileB3.open(countries[b].insert(countries[b].length(), "Navy.txt"));
-
-    while (true)
-    {
-        inFileB3 >> milEquipment >> equipmentAmount;
-        if (inFileB3.fail()) break;
-        totalNavalVessels += equipmentAmount;
-        if (inFileB3.eof())
-            break;
-    }
-    return totalNavalVessels;
-}
-
-int getNavyLogA(int b)
-{
-    ifstream inFileB3;
-    string logEquipment;
-    int equipmentAmount;
-    int totalLogVehicles = 0;
-    inFileB3.open(countries[b].insert(countries[b].length(), "NavyL.txt"));
-
-    while (true)
-    {
-        inFileB3 >> logEquipment >> equipmentAmount;
-        if (inFileB3.fail()) break;
-        totalLogVehicles += equipmentAmount;
-        if (inFileB3.eof())
-            break;
-    }
-    return totalLogVehicles;
-}
-
-int getMarinesOffenseA(int b)
-{
-    ifstream inFileB4;
-    string milEquipment;
-    int equipmentAmount;
-    int totalCombatCapability = 0;
-    inFileB4.open(countries[b].insert(countries[b].length(), "Marine.txt"));
-
-    while (true)
-    {
-        inFileB4 >> milEquipment >> equipmentAmount;
-        if (inFileB4.fail()) break;
-        totalCombatCapability += equipmentAmount;
-        if (inFileB4.eof())
-            break;
-    }
-    return totalCombatCapability;
-}
-
-int getMarinesLogA(int b)
-{
-    ifstream inFileB4;
-    string logEquipment;
-    int equipmentAmount;
-    int totalLogVehicle = 0;
-    inFileB4.open(countries[b].insert(countries[b].length(), "MarineL.txt"));
-
-    while (true)
-    {
-        inFileB4 >> logEquipment >> equipmentAmount;
-        if (inFileB4.fail()) break;
-        totalLogVehicle += equipmentAmount;
-        if (inFileB4.eof())
-            break;
-    }
-    return totalLogVehicle;
-}
-
-float calcDmgTMultiplierArA(int aRlA)
+float calcDmgTMultiplier(int i)
 {
     int identifier;
     float dmgMultiplier;
 
-    identifier = aRlA / 500;
+    identifier = i / 500;
     if (identifier > 5)
     {
         identifier = 5;
@@ -421,220 +268,10 @@ float calcDmgTMultiplierArA(int aRlA)
     return dmgMultiplier;
 }
 
-float calcDmgTMultiplierAiA(int aIlA)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = aIlA / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-float calcDmgTMultiplierNA(int nLA)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = nLA / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-float calcDmgTMultiplierMA(int mLA)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = mLA / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-float calcDmgTMultiplierArB(int aRlB)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = aRlB / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-float calcDmgTMultiplierAiB(int aIlB)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = aIlB / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-float calcDmgTMultiplierNB(int nLB)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = nLB / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-float calcDmgTMultiplierMB(int mLB)
-{
-    int identifier;
-    float dmgMultiplier;
-
-    identifier = mLB / 500;
-    if (identifier > 5)
-    {
-        identifier = 5;
-    }
-    dmgMultiplier = dmgTMultiplier[identifier];
-
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierArA(int aRlA)
+int calcDmgOMultiplier(int i)
 {
     int dmgMultiplier;
-    dmgMultiplier = aRlA / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcdmgOMultiplierAiA(int aIlA)
-{
-    int dmgMultiplier;
-    dmgMultiplier = aIlA / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierNA(int nLA)
-{
-    int dmgMultiplier;
-    dmgMultiplier = nLA / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierMA(int mLA)
-{
-    int dmgMultiplier;
-    dmgMultiplier = mLA / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierArB(int aRlB)
-{
-    int dmgMultiplier;
-    dmgMultiplier = aRlB / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierAiB(int aIlB)
-{
-    int dmgMultiplier;
-    dmgMultiplier = aIlB / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierNB(int nLB)
-{
-    int dmgMultiplier;
-    dmgMultiplier = nLB / 500;
-    if (dmgMultiplier == 0)
-    {
-        dmgMultiplier = 1;
-    }
-    if (dmgMultiplier > 6)
-    {
-        dmgMultiplier = 6;
-    }
-    return dmgMultiplier;
-}
-
-int calcDmgOMultiplierMB(int mLB)
-{
-    int dmgMultiplier;
-    dmgMultiplier = mLB / 500;
+    dmgMultiplier = i / 500;
     if (dmgMultiplier == 0)
     {
         dmgMultiplier = 1;
@@ -657,63 +294,109 @@ float calcLandOccupied(int totalArComCapA, int finalArComCapA, int totalArComCap
     {
         return (totalArComCapA - finalArComCapA) / totalArComCapA * 100 * 0.5;
     }
-
 }
 
-float calcLandOccupiedB(int totalArComCapB, int finalArComCapB)
+void getCountryAStats(int *arr, int i)
 {
-    float percent;
-    percent = (totalArComCapB - finalArComCapB) / totalArComCapB * 100;
+    arr[0] = getArmyOffense(i);
+    arr[1] = getArmyLog(i);
+    arr[2] = getAirForceOffense(i);
+    arr[3] = getAirForceLog(i);
+    arr[4] = getNavyOffense(i);
+    arr[5] = getNavyLog(i);
+    arr[6] = getMarinesOffense(i);
+    arr[7] = getMarinesLog(i);
 }
 
-void runSim()
+void getCountryBStats(int *arr, int i)
 {
-    int aRoA, aRlA, aIoA, aIlA, nOA, nLA, mOA, mLA, aRoB, aRlB, aIoB, aIlB, nOB, nLB, mOB, mLB;
-    int a, b, l, totalArComCapA, totalAiComCapA, totalNComCapA, totalArComCapB, totalAiComCapB, totalNComCapB, finalArComCapA, finalAiComCapA, finalNComCapA, finalArComCapB, finalAiComCapB, finalNComCapB;
-    a = getCountryA();
-    b = getCountryB();
-    l = getLocation();
-    // Country A
-    aRoA = getArmyOffenseA(a);
-    aRlA = getArmylogisticsA(a);
-    aIoA = getAirForceOffenseA(a);
-    aIlA = getAirForceLogA(a);
-    nOA = getNavyOffenseA(a);
-    nLA = getNavyLogA(a);
-    mOA = getMarinesOffenseA(a);
-    mLA = getMarinesLogA(a);
-    // Country B
-    aRoB = getArmyOffenseA(b);
-    aRlB = getArmylogisticsA(b);
-    aIoA = getAirForceOffenseA(b);
-    aIlA = getAirForceLogA(b);
-    nOA = getNavyOffenseA(b);
-    nLA = getNavyLogA(b);
-    mOA = getMarinesOffenseA(b);
-    mLA = getMarinesLogA(b);
-    // Computation for troop value on both sides
-    totalArComCapA = aRoA * calcDmgOMultiplierArA(aRlA) + (0.075 * aIoA) + (0.15 * nOA) + ((0.7 * mOA) * calcDmgOMultiplierMA(mLA)) * terrainOffenseAdvantage[l];
-    totalAiComCapA = aIoA * calcDmgTMultiplierAiA(aIlA);
-    totalNComCapA = nOA * calcDmgOMultiplierNA(nLA) + (0.075 * aIoA) + ((0.3 * mOA) * calcDmgOMultiplierMA(mLA));
+    arr[0] = getArmyOffense(i);
+    arr[1] = getArmyLog(i);
+    arr[2] = getAirForceOffense(i);
+    arr[3] = getAirForceLog(i);
+    arr[4] = getNavyOffense(i);
+    arr[5] = getNavyLog(i);
+    arr[6] = getMarinesOffense(i);
+    arr[7] = getMarinesLog(i);
+}
 
-    totalArComCapB = aRoB * calcDmgOMultiplierArB(aRlA) + (0.075 * aIoB) + (0.15 * nOB) + ((0.7 * mOB) * calcDmgOMultiplierMB(mLB)) * terrainDefenseAdvantage[l];
-    totalAiComCapB = aIoB * calcDmgTMultiplierAiB(aIlA);
-    totalNComCapB = nOB * calcDmgOMultiplierNB(nLB) + (0.075 * aIoB) + ((0.3 * mOB) * calcDmgOMultiplierMB(mLB));
-    // Damage Model
-    finalArComCapA = totalArComCapA - (totalArComCapA * calcDmgTMultiplierArA(aRlA));
-    finalAiComCapA = totalAiComCapA - (totalAiComCapA * calcDmgTMultiplierAiA(aIlA));
-    finalNComCapA = totalNComCapA - (totalNComCapA * calcDmgTMultiplierNA(nLA));
+int dmgModel(int t, int m)
+{
+    return t - (t * m);
+}
 
-    finalArComCapB = totalArComCapB - (totalAiComCapB * calcDmgTMultiplierArB(aRlB));
-    finalAiComCapB = totalAiComCapB - (totalAiComCapB * calcDmgTMultiplierAiB(aIlB));
-    finalNComCapA = totalNComCapB - (totalNComCapB * calcDmgTMultiplierNB(nLB));
-    // Occupation Percentage
-    calcLandOccupied(totalArComCapA, finalArComCapA, totalArComCapB, finalArComCapB);
+void writeToText(int *arr, int i)
+{
+    ofstream outFile;
+    outFile.open("Simulation_Result.txt");
+    if (!outFile)
+    {
+        cerr << "Error\n";
+    }
+    else
+    {
+        outFile << setprecision(2) << fixed << left;
+        outFile << "Initial Country A Strength\n" << setw(15) << "Army" << setw(15) << "Air Force" << "Navy\n";
+        outFile << setw(15) << arr[0] << setw(15) << arr[1] << arr[2] << endl << endl;
+        outFile << "Initial Country B Strength\n" << setw(15) << "Army" << setw(15) << "Air Force" << "Navy\n";
+        outFile << setw(15) << arr[6] << setw(15) << arr[7] << arr[8] << endl << endl;
+        outFile << "Final Country A Strength\n" << setw(15) << "Army" << setw(15) << "Air Force" << "Navy\n";
+        outFile << setw(15) << arr[3] << setw(15) << arr[4] << arr[5] << endl << endl;
+        outFile << "Final Country B Strength\n" << setw(15) << "Army" << setw(15) << "Air Force" << "Navy\n";
+        outFile << setw(15) << arr[9] << setw(15) << arr[10] << arr[11] << endl << endl;
+        outFile << "Area conquered by Country A: " << i << "%" << endl;
+    }
 }
 
 int main()
 {
-    cout << setprecision(2) << fixed << left;
-    runSim();
+    int  l, lO, totalArComCapA, totalAiComCapA, totalNComCapA, totalArComCapB, totalAiComCapB, totalNComCapB, finalArComCapA, finalAiComCapA, finalNComCapA, finalArComCapB, finalAiComCapB, finalNComCapB;
+    int countryStatsAgressor[NUM_OF_STATS];
+    int countryStatsDefender[NUM_OF_STATS];
+    int selectCountries[COUNTRYSELECTIONSIZE];
+    l = getLocation();
+    selectCountry(selectCountries);
+    for (int i = 0; i < 2; i++)
+    {
+        selectCountries[i] = errorhandling(selectCountries[i]);
+    }
+    // Country A
+    getCountryAStats(countryStatsAgressor, selectCountries[0]);
+    // Country B
+    getCountryBStats(countryStatsDefender, selectCountries[1]);
+    // Computation for troop value on both sides
+    totalArComCapA = countryStatsAgressor[0] * calcDmgOMultiplier(countryStatsAgressor[1]) + (0.075 * countryStatsAgressor[2]) + (0.15 * countryStatsAgressor[4]) + ((0.7 * countryStatsAgressor[6]) * calcDmgOMultiplier(countryStatsAgressor[7])) * terrainOffenseAdvantage[l];
+    totalAiComCapA = countryStatsAgressor[2] * calcDmgTMultiplier(countryStatsAgressor[3]);
+    totalNComCapA = countryStatsAgressor[4] * calcDmgOMultiplier(countryStatsAgressor[5]) + (0.075 * countryStatsAgressor[2]) + ((0.3 * countryStatsAgressor[6]) * calcDmgOMultiplier(countryStatsAgressor[7]));
+
+    totalArComCapB = countryStatsDefender[0] * calcDmgOMultiplier(countryStatsDefender[1]) + (0.075 * countryStatsDefender[2]) + (0.15 * countryStatsDefender[4]) + ((0.7 * countryStatsDefender[6]) * calcDmgOMultiplier(countryStatsDefender[7])) * terrainDefenseAdvantage[l];
+    totalAiComCapB = countryStatsDefender[2] * calcDmgTMultiplier(countryStatsDefender[3]);
+    totalNComCapB = countryStatsDefender[4] * calcDmgOMultiplier(countryStatsDefender[5]) + (0.075 * countryStatsDefender[2]) + ((0.3 * countryStatsDefender[6]) * calcDmgOMultiplier(countryStatsDefender[7]));
+    // Damage Model
+    finalArComCapA = dmgModel(totalArComCapA, calcDmgTMultiplier(countryStatsAgressor[1]));
+    finalAiComCapA = dmgModel(totalAiComCapA, calcDmgTMultiplier(countryStatsAgressor[3]));
+    finalNComCapA = dmgModel(totalNComCapA, calcDmgTMultiplier(countryStatsAgressor[5]));
+
+    finalArComCapB = dmgModel(totalAiComCapB, calcDmgTMultiplier(countryStatsDefender[1]));
+    finalAiComCapB = dmgModel(totalAiComCapB, calcDmgTMultiplier(countryStatsDefender[3]));
+    finalNComCapA = dmgModel(totalNComCapB, calcDmgTMultiplier(countryStatsDefender[5]));
+    // Occupation Percentage
+    lO = calcLandOccupied(totalArComCapA, finalArComCapA, totalArComCapB, finalArComCapB);
+    // Readout
+    int arr[] = {
+        totalArComCapA,
+        totalAiComCapA,
+        totalNComCapA,
+        finalArComCapA,
+        finalAiComCapA,
+        finalNComCapA,
+        totalArComCapB,
+        totalAiComCapB,
+        totalNComCapB,
+        finalArComCapB,
+        finalAiComCapB,
+        finalNComCapA
+    };
+    writeToText(arr, lO);
     return 0;
 }
