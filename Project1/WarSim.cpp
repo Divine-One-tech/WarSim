@@ -25,12 +25,12 @@ string locationsForSimulation[] =
     "Iwo Jima", "Streets of New York", "Shores of North Korea", "Normandy", "Taiwan"
 };
 
-int terrainDefenseAdvantage[] =
+float terrainDefenseAdvantage[] =
 {
     4, 1, 3, 3, 4
 };
 
-int terrainOffenseAdvantage[] =
+float terrainOffenseAdvantage[] =
 {
     1, 1, 2, 2, 1
 };
@@ -42,6 +42,7 @@ float dmgTMultiplier[] =
 
 void selectCountry(int *arr)
 {
+    int num1, num2;
     cout << "Please choose aggressor and defending country from this list" << endl;
     
     for (int i = 0; i < SIZE; i++)
@@ -49,7 +50,9 @@ void selectCountry(int *arr)
         cout << i + 1 << ". " << countries[i] << endl;
     }
     cout << "Enter the number: ";
-    cin >> arr[0] >> arr[1];
+    cin >> num1 >> num2;
+    arr[0] = num1 - 1;
+    arr[1] = num2 - 1;
 }
 
 int errorhandling(int i)
@@ -258,7 +261,7 @@ float calcDmgTMultiplier(int i)
         identifier = 5;
     }
     dmgMultiplier = dmgTMultiplier[identifier];
-
+    
     return dmgMultiplier;
 }
 
@@ -277,21 +280,9 @@ int calcDmgOMultiplier(int i)
     return dmgMultiplier;
 }
 
-float calcLandOccupied(int totalArComCapA, int finalArComCapA, int totalArComCapB, int finalArComCapB)
+float calcPercentLoss(float t, float f)
 {
-    float percent;
-    if (finalArComCapA > finalArComCapB)
-    {
-        return (totalArComCapA - finalArComCapA) / totalArComCapA * 100;
-    }
-    else if (finalArComCapA < finalArComCapB)
-    {
-        return (totalArComCapA - finalArComCapA) / totalArComCapA * 100 * 0.5;
-    }
-    else
-    {
-        return (totalArComCapA - finalArComCapA) / totalArComCapA * 100 * 0.75;
-    }
+    return (t - f) / t * 100;
 }
 
 void getCountryStats(int *arr, int i)
@@ -306,14 +297,39 @@ void getCountryStats(int *arr, int i)
     arr[7] = getMarinesLog(i);
 }
 
-int dmgModel(int t, int m)
+int dmgModel(int t, float m)
 {
     return t - (t * m);
 }
+float percentLandOccupied(int totalArComCapA, int finalArComCapA, int totalArComCapB, int finalArComCapB, int l)
+{
+    if (finalArComCapA > finalArComCapB)
+        return (((float)finalArComCapA / totalArComCapA) * 100) * terrainOffenseAdvantage[l] / terrainDefenseAdvantage[l];
+    else 
+        return 100;
+    
+}
 
-void writeToText(int *arr, int i)
+void writeToText(int* arr, float i, float n, int l, int* arr2, float lO)
 {
     ofstream outFile;
+    string victor, winState;
+    if (arr[3] > arr[9])
+    {
+        victor = countries[arr2[0]];
+    }
+    else
+    {
+        victor = countries[arr2[1]];
+    }
+    if (lO == 100)
+    {
+        winState = "Defended";
+    }
+    else
+    {
+        winState = "Occupied";
+    }
     outFile.open("Simulation_Result.txt");
     if (!outFile)
     {
@@ -330,66 +346,58 @@ void writeToText(int *arr, int i)
         outFile << setw(15) << arr[3] << setw(15) << arr[4] << arr[5] << endl << endl;
         outFile << "Final Country B Strength\n" << setw(15) << "Army" << setw(15) << "Air Force" << "Navy\n";
         outFile << setw(15) << arr[9] << setw(15) << arr[10] << arr[11] << endl << endl;
-        outFile << "Area conquered by Country A: " << i << "%" << endl;
+        outFile << "Country A Losses: " << i << "%" << endl;
+        outFile << "Country B Losses: " << n << "%" << endl;
+        outFile << "Victor: " << victor << endl;
+        outFile << "Land " << winState << ": " << lO << endl;
     }
     outFile.close();
 }
 
 int main()
 {
-    int  l, lO, totalArComCapA, totalAiComCapA, totalNComCapA, totalArComCapB, totalAiComCapB, totalNComCapB, finalArComCapA, finalAiComCapA, finalNComCapA, finalArComCapB, finalAiComCapB, finalNComCapB;
+    int  l, totalArComCapA, totalAiComCapA, totalNComCapA, totalArComCapB, totalAiComCapB, totalNComCapB;
+    float finalArComCapA, finalAiComCapA, finalNComCapA, finalArComCapB, finalAiComCapB, finalNComCapB;
     int countryStatsAgressor[NUM_OF_STATS];
     int countryStatsDefender[NUM_OF_STATS];
     int selectCountries[COUNTRYSELECTIONSIZE];
+    float cAL, cBL, lO;
     l = getLocation();
     selectCountry(selectCountries);
-    // Country A
-    getCountryStats(countryStatsAgressor, selectCountries[0] - 1);
-    for (int i = 0; i < 8; i++)
-    {
-        cout << countryStatsAgressor[i] << "\t";
-    }
-    cout << endl;
-    // Country B
-    getCountryStats(countryStatsDefender, selectCountries[1] - 1);
-    for (int i = 0; i < 8; i++)
-    {
-        cout << countryStatsDefender[i] << "\t";
-    }
-    // Computation for troop value on both sides
-    totalArComCapA = countryStatsAgressor[0] * calcDmgOMultiplier(countryStatsAgressor[1]) + (0.075 * countryStatsAgressor[2]) + (0.15 * countryStatsAgressor[4]) + ((0.7 * countryStatsAgressor[6]) * calcDmgOMultiplier(countryStatsAgressor[7])) * terrainOffenseAdvantage[l];
+    getCountryStats(countryStatsAgressor, selectCountries[0]);
+    getCountryStats(countryStatsDefender, selectCountries[1]);
+    totalArComCapA = countryStatsAgressor[0] * (1 + calcDmgOMultiplier(countryStatsAgressor[1])) + (1.075 * countryStatsAgressor[2]) + (1.15 * countryStatsAgressor[4]) + ((1.7 * countryStatsAgressor[6]) * (1 + calcDmgOMultiplier(countryStatsAgressor[7]))) * terrainOffenseAdvantage[l];
     totalAiComCapA = countryStatsAgressor[2] * (1 + calcDmgTMultiplier(countryStatsAgressor[3]));
-    cout << totalAiComCapA << " " << countryStatsAgressor[2] << " " << calcDmgTMultiplier(countryStatsAgressor[3]) << endl;
-    totalNComCapA = countryStatsAgressor[4] * calcDmgOMultiplier(countryStatsAgressor[5]) + (0.075 * countryStatsAgressor[2]) + ((0.3 * countryStatsAgressor[6]) * calcDmgOMultiplier(countryStatsAgressor[7]));
+    totalNComCapA = countryStatsAgressor[4] * calcDmgOMultiplier(countryStatsAgressor[5]) + (1.075 * countryStatsAgressor[2]) + ((1.3 * countryStatsAgressor[6]) * (1 + calcDmgOMultiplier(countryStatsAgressor[7])));
 
-    totalArComCapB = countryStatsDefender[0] * calcDmgOMultiplier(countryStatsDefender[1]) + (0.075 * countryStatsDefender[2]) + (0.15 * countryStatsDefender[4]) + ((0.7 * countryStatsDefender[6]) * calcDmgOMultiplier(countryStatsDefender[7])) * terrainDefenseAdvantage[l];
+    totalArComCapB = countryStatsDefender[0] * (1 + calcDmgOMultiplier(countryStatsDefender[1])) + (1.075 * countryStatsDefender[2]) + (1.15 * countryStatsDefender[4]) + ((1.7 * countryStatsDefender[6]) * (1 + calcDmgOMultiplier(countryStatsDefender[7]))) * terrainDefenseAdvantage[l];
     totalAiComCapB = countryStatsDefender[2] * (1 + calcDmgTMultiplier(countryStatsDefender[3]));
-    totalNComCapB = countryStatsDefender[4] * calcDmgOMultiplier(countryStatsDefender[5]) + (0.075 * countryStatsDefender[2]) + ((0.3 * countryStatsDefender[6]) * calcDmgOMultiplier(countryStatsDefender[7]));
-    // Damage Model
-    finalArComCapA = dmgModel(totalArComCapA, calcDmgTMultiplier(countryStatsAgressor[1]));
-    finalAiComCapA = dmgModel(totalAiComCapA, calcDmgTMultiplier(countryStatsAgressor[3]));
-    finalNComCapA = dmgModel(totalNComCapA, calcDmgTMultiplier(countryStatsAgressor[5]));
+    totalNComCapB = countryStatsDefender[4] * (1 + calcDmgOMultiplier(countryStatsDefender[5])) + (1.075 * countryStatsDefender[2]) + ((1.3 * countryStatsDefender[6]) * (1 + calcDmgOMultiplier(countryStatsDefender[7])));
+    
+    finalArComCapA = dmgModel(totalArComCapA, (calcDmgTMultiplier(countryStatsAgressor[1])));
+    finalAiComCapA = dmgModel(totalAiComCapA, (calcDmgTMultiplier(countryStatsAgressor[3])));
+    finalNComCapA = dmgModel(totalNComCapA, (calcDmgTMultiplier(countryStatsAgressor[5])));
 
-    finalArComCapB = dmgModel(totalAiComCapB, calcDmgTMultiplier(countryStatsDefender[1]));
-    finalAiComCapB = dmgModel(totalAiComCapB, calcDmgTMultiplier(countryStatsDefender[3]));
-    finalNComCapB = dmgModel(totalNComCapB, calcDmgTMultiplier(countryStatsDefender[5]));
-    // Occupation Percentage
-    lO = calcLandOccupied(totalArComCapA, finalArComCapA, totalArComCapB, finalArComCapB);
-    // Readout
+    finalArComCapB = dmgModel(totalAiComCapB, (calcDmgTMultiplier(countryStatsDefender[1])));
+    finalAiComCapB = dmgModel(totalAiComCapB, (calcDmgTMultiplier(countryStatsDefender[3])));
+    finalNComCapB = dmgModel(totalNComCapB, (calcDmgTMultiplier(countryStatsDefender[5])));
+    cAL = calcPercentLoss(totalArComCapA, finalArComCapA);
+    cBL = calcPercentLoss(totalArComCapB, finalArComCapB);
+    lO = percentLandOccupied(totalArComCapA, finalArComCapA, totalArComCapB, finalArComCapB, l);
     int arr[] = {
         totalArComCapA,
         totalAiComCapA,
         totalNComCapA,
-        finalArComCapA,
-        finalAiComCapA,
-        finalNComCapA,
+        (int)finalArComCapA,
+        (int)finalAiComCapA,
+        (int)finalNComCapA,
         totalArComCapB,
         totalAiComCapB,
         totalNComCapB,
-        finalArComCapB,
-        finalAiComCapB,
-        finalNComCapA
+        (int)finalArComCapB,
+        (int)finalAiComCapB,
+        (int)finalNComCapA
     };
-    writeToText(arr, lO);
+    writeToText(arr, cAL, cBL, l, selectCountries, lO);
     return 0;
 }
